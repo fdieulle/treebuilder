@@ -8,23 +8,20 @@ def expand(source: List[Dict[str, Any]], entry: str, values: List[Any]) -> List[
 
     result = []
     # Add values as a ring to the sources
-    # Todo: Perf here could we use zip builtin function instead ?
     index = 0
-    has_any_item = False
-    should_add_new_items = True
+    should_expand_source = True
     for item in source:
-        has_any_item = True
         if index == len(values):
             index = 0
-            should_add_new_items = False
+            should_expand_source = False
         
         item[entry] = values[index]
         index += 1
         result.append(item)
 
     # If the values is longer than the source
-    if should_add_new_items:
-        if has_any_item:
+    if should_expand_source:
+        if len(source) > 0:
             # We ring around the source valuse to duplicate then set the value
             while index < len(values):
                 for item in source:
