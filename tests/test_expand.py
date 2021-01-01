@@ -63,7 +63,7 @@ class TestExpand(unittest.TestCase):
         self.__check(result, 'Name', 'foo', 'foo', 'foo')
         self.__check(result, 'Value', 1, 2, 3)
 
-    def test_expand_with_longer_values_and_repear(self):
+    def test_expand_with_longer_values_and_repeat(self):
         result = expand([], 'Name', ['foo', 'bar'])
         result = expand(result, 'Value', [1, 2, 3, 4, 5, 6])
 

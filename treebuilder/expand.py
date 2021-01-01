@@ -1,7 +1,7 @@
-import itertools
 from typing import Any, Dict, List
 
 
+# Todo: maybe it should be better to returns an iterable instead of a list
 def expand(source: List[Dict[str, Any]], entry: str, values: List[Any]) -> List[Dict[str, Any]]:
     if len(values) == 0:
         return source
