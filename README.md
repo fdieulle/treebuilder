@@ -26,12 +26,16 @@ We also setup the lang as an attribute and a price for each of them.
 import treebuilder as tb
 
 builder = tb.TreeBuilder()
+
 # Create 2 books in a bookstore
 builder.expand('/bookstore/book/title', ['Sapiens', 'Harry Potter'])
-# Set the lang to all books
+
+# Set the lang to all books as attribute
 builder.set('/bookstore/book/@lang', 'en')
-# Set the price to each book
+
+# Set the price for each book
 builder.nest('/bookstore/book/price', [39.95, 29.99])
+
 # Duplicate each book to make 2 copies
 builder.cross('/bookstore/book/copy_number', [1, 2]) 
 
