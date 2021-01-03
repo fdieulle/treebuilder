@@ -5,12 +5,14 @@ from typing import Any, Dict, List
 def expand(source: List[Dict[str, Any]], entry: str, values: List[Any]) -> List[Dict[str, Any]]:
     """Expand source by a values list 
 
+    Expand generates combination of source and values one by one.
+
     When both source and values have the same length, the expansion is applied only
-    on each source item by setting values to the entry key one by one.
-    If their length are different, the expansion can alsoe applies on either the source and 
+    on each source's item by setting each value to its entry key.
+    If their length are differents, the expansion applies on either source and 
     values lists length.
 
-    The shorter list rolls until reaching the end of the longer by using a ring logic.
+    The shortest list rolls until reaching the end of the longer one by using a ring logic.
     A list used as a ring means that when the end of this list is reached we go back to 
     the first element then continue iteration.
 
@@ -40,7 +42,7 @@ def expand(source: List[Dict[str, Any]], entry: str, values: List[Any]) -> List[
         return source
 
     result = []
-    # Add values as a ring to the sources
+    # Add values as a ring to the source
     index = 0
     should_expand_source = True
     for item in source:
@@ -52,10 +54,10 @@ def expand(source: List[Dict[str, Any]], entry: str, values: List[Any]) -> List[
         index += 1
         result.append(item)
 
-    # If the values is longer than the source
+    # If values is longer than the source
     if should_expand_source:
         if len(source) > 0:
-            # We ring around the source valuse to duplicate then set the value
+            # We ring around the source values to duplicate items then set the value
             while index < len(values):
                 for item in source:
                     if index == len(values):
@@ -65,7 +67,7 @@ def expand(source: List[Dict[str, Any]], entry: str, values: List[Any]) -> List[
                     index += 1
                     result.append(copy)
         else:
-            # The source is empty so we build full new values
+            # The source is empty so we build from values
             while index < len(values):
                 result.append({ entry: values[index] })
                 index += 1
