@@ -1,9 +1,9 @@
 language: python
 python:
-    - "3.6"
-    - "3.8"
+ - "3.6"
+ - "3.9"
 install:
-    - pip install -r requirement.txt
-    - pip install .
+ - pip install -r requirement.txt
+ - pip install .
 script: 
-    - python -m unittest discover -v -s "./tests" -p "test_*.py"
+ - python -m unittest discover -v -s "./tests" -p "test_*.py"
