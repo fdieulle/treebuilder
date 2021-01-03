@@ -7,6 +7,8 @@ from treebuilder.FilterLexer import FilterLexer
 from treebuilder.FilterParser import FilterParser
 from treebuilder.expand import expand
 from treebuilder.cross import cross
+from treebuilder.xml import to_xml
+from treebuilder.json import to_json
 
 
 class TreeBuilder:
@@ -30,6 +32,12 @@ class TreeBuilder:
         items = cross(items, entry, values)
         self.__attach_items_to_tree(items, entry)
         return self
+
+    def to_xml(self, file_path: str, root: str = None, pretty: bool = True):
+        to_xml(self.root, file_path, root=root, pretty=pretty)
+
+    def to_json(self, file_path: str, root: str = None, pretty: bool = True):
+        to_json(self.root, file_path, pretty=pretty)
     
     def __get_tag_and_filter(self, step: str) -> Tuple[str, str]:
         split = step.split('[')

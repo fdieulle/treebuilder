@@ -1,5 +1,7 @@
+import json
 from treebuilder.constants import ATTRIBUTES
 import unittest
+import os
 from treebuilder.TreeBuilder import TreeBuilder
 
 
@@ -84,7 +86,53 @@ class TestTreeBuilder(unittest.TestCase):
         self.assertEqual(root['Root'][0]['Node'][5]['Details'][0]['Count'], '2')
         self.assertEqual(root['Root'][0]['Node'][5]['Details'][0]['Value'], 20)
 
+    def test_to_json(self):
+        builder = TreeBuilder()
 
+        builder.expand('bookstore/books/title', ['Sapiens', 'Harry Potter', 'A Time of Mercy'])
+        builder.set('bookstore/books/is_in_stock', True)
+        builder.set('bookstore/books[title="Harry Potter"]/price', 9.99)
+        builder.set('bookstore/books[title="A Time of Mercy"]/price', 12.99)
+        builder.expand('bookstore/books[title="Sapiens"]/price', [39.99])
+        builder.set('bookstore/books/details/count', 3)
+        builder.set('bookstore/books[title != "Sapiens"]/details/description', 'This is the description')
+
+        test_file = 'bookstore.json'
+        builder.to_json(test_file)
+
+        self.__check_files(test_file, self.__get_file_path('bookstore.json'))
+        os.remove(test_file)
+
+    def test_to_xml(self):
+        builder = TreeBuilder()
+
+        builder.set('bookstore/@xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance')
+        builder.set('bookstore/@xmlns:xsd', 'http://www.w3.org/2001/XMLSchema')
+        builder.expand('bookstore/book/title', ['Sapiens', 'Harry Potter', 'A Time of Mercy'])
+        builder.set('bookstore/book/@xsi:type', 'Book')
+        builder.set('bookstore/book/is_in_stock', True)
+        builder.set('bookstore/book[title="Harry Potter"]/price', 9.99)
+        builder.set('bookstore/book[title="A Time of Mercy"]/price', 12.99)
+        builder.expand('bookstore/book[title="Sapiens"]/price', [39.99])
+        builder.set('bookstore/book/details/count', 3)
+        builder.set('bookstore/book[title != "Sapiens"]/details/description', 'This is the description')
+
+        test_file = 'bookstore.xml'
+        builder.to_xml(test_file)
+
+        self.__check_files(test_file, self.__get_file_path('bookstore.xml'))
+        os.remove(test_file)
+
+
+    def __check_files(self, x: str, y: str):
+        with open(x, mode='r') as f:
+            x_content = f.read()
+        with open(y, mode='r') as f:
+            y_content = f.read()
+        self.assertEqual(x_content, y_content)
+    
+    def __get_file_path(self, file_name: str):
+        return os.path.join(os.path.dirname(__file__), 'data', file_name)
 
 if __name__ == '__main__':
     unittest.main()

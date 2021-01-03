@@ -1,0 +1,32 @@
+{
+	"bookstore": {
+		"books": [
+			{
+				"title": "Sapiens",
+				"is_in_stock": true,
+				"price": 39.99,
+				"details": {
+					"count": 3
+				}
+			},
+			{
+				"title": "Harry Potter",
+				"is_in_stock": true,
+				"price": 9.99,
+				"details": {
+					"count": 3,
+					"description": "This is the description"
+				}
+			},
+			{
+				"title": "A Time of Mercy",
+				"is_in_stock": true,
+				"price": 12.99,
+				"details": {
+					"count": 3,
+					"description": "This is the description"
+				}
+			}
+		]
+	}
+}
