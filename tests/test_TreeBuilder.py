@@ -1,4 +1,6 @@
+from collections import deque
 import json
+import xml.etree.ElementTree as ET
 from treebuilder.constants import ATTRIBUTES
 import unittest
 import os
@@ -86,51 +88,93 @@ class TestTreeBuilder(unittest.TestCase):
         self.assertEqual(root['Root'][0]['Node'][5]['Details'][0]['Count'], '2')
         self.assertEqual(root['Root'][0]['Node'][5]['Details'][0]['Value'], 20)
 
-    # def test_to_json(self):
-    #     builder = TreeBuilder()
+    def test_to_json(self):
+        builder = TreeBuilder()
 
-    #     builder.expand('bookstore/books/title', ['Sapiens', 'Harry Potter', 'A Time of Mercy'])
-    #     builder.set('bookstore/books/is_in_stock', True)
-    #     builder.set('bookstore/books[title="Harry Potter"]/price', 9.99)
-    #     builder.set('bookstore/books[title="A Time of Mercy"]/price', 12.99)
-    #     builder.expand('bookstore/books[title="Sapiens"]/price', [39.99])
-    #     builder.set('bookstore/books/details/count', 3)
-    #     builder.set('bookstore/books[title != "Sapiens"]/details/description', 'This is the description')
+        builder.expand('bookstore/books/title', ['Sapiens', 'Harry Potter', 'A Time of Mercy'])
+        builder.set('bookstore/books/is_in_stock', True)
+        builder.set('bookstore/books[title="Harry Potter"]/price', 9.99)
+        builder.set('bookstore/books[title="A Time of Mercy"]/price', 12.99)
+        builder.expand('bookstore/books[title="Sapiens"]/price', [39.99])
+        builder.set('bookstore/books/details/count', 3)
+        builder.set('bookstore/books[title != "Sapiens"]/details/description', 'This is the description')
 
-    #     test_file = 'bookstore.json'
-    #     builder.to_json(test_file)
+        test_file = 'bookstore.json'
+        builder.to_json(test_file)
 
-    #     self.__check_files(test_file, self.__get_file_path('bookstore.json'))
-    #     # os.remove(test_file)
+        check_file = self.__get_data_file('bookstore.json')
+        with open(check_file, mode='r') as f:
+            check_data = json.loads(f.read())
+        with open(test_file, mode='r') as f:
+            test_data = json.loads(f.read())
 
-    # def test_to_xml(self):
-    #     builder = TreeBuilder()
+        stack = deque()
+        stack.append((check_data, test_data))
+        while len(stack) > 0:
+            check_node, test_node = stack.pop()
 
-    #     builder.set('bookstore/@xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance')
-    #     builder.set('bookstore/@xmlns:xsd', 'http://www.w3.org/2001/XMLSchema')
-    #     builder.expand('bookstore/book/title', ['Sapiens', 'Harry Potter', 'A Time of Mercy'])
-    #     builder.set('bookstore/book/@xsi:type', 'Book')
-    #     builder.set('bookstore/book/is_in_stock', True)
-    #     builder.set('bookstore/book[title="Harry Potter"]/price', 9.99)
-    #     builder.set('bookstore/book[title="A Time of Mercy"]/price', 12.99)
-    #     builder.expand('bookstore/book[title="Sapiens"]/price', [39.99])
-    #     builder.set('bookstore/book/details/count', 3)
-    #     builder.set('bookstore/book[title != "Sapiens"]/details/description', 'This is the description')
+            if isinstance(check_node, dict):
+                self.assertTrue(type(test_node) == dict)
+                self.assertTrue(len(check_node) == len(test_node))
+                for key in check_node:
+                    self.assertTrue(key in test_node)
+                    stack.append((check_node[key], test_node[key]))
+            elif isinstance(check_node, list):
+                self.assertTrue(type(test_node) == list)
+                self.assertTrue(len(check_node) == len(test_node))
+                [stack.append((c, t)) for c, t in zip(check_node, test_node)]
+            else:
+                self.assertTrue(check_node == test_node)
 
-    #     test_file = 'bookstore.xml'
-    #     builder.to_xml(test_file)
+        os.remove(test_file)
 
-    #     self.__check_files(test_file, self.__get_file_path('bookstore.xml'))
-    #     os.remove(test_file)
+    def test_to_xml(self):
+        builder = TreeBuilder()
 
-    def __check_files(self, x: str, y: str):
-        with open(x, mode='r') as f:
-            x_content = f.read()
-        with open(y, mode='r') as f:
-            y_content = f.read()
-        self.assertEqual(x_content, y_content)
+        builder.set('bookstore/@xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance')
+        builder.set('bookstore/@xmlns:xsd', 'http://www.w3.org/2001/XMLSchema')
+        builder.expand('bookstore/book/title', ['Sapiens', 'Harry Potter', 'A Time of Mercy'])
+        builder.set('bookstore/book/@xsi:type', 'Book')
+        builder.set('bookstore/book/is_in_stock', True)
+        builder.set('bookstore/book[title="Harry Potter"]/price', 9.99)
+        builder.set('bookstore/book[title="A Time of Mercy"]/price', 12.99)
+        builder.expand('bookstore/book[title="Sapiens"]/price', [39.99])
+        builder.set('bookstore/book/details/count', 3)
+        builder.set('bookstore/book[title != "Sapiens"]/details/description', 'This is the description')
+
+        test_file = 'bookstore.xml'
+        builder.to_xml(test_file)
+
+        check_file = self.__get_data_file('bookstore.xml')
+        
+        check_xml = ET.parse(check_file)
+        test_xml = ET.parse(test_file)
+
+        stack = deque()
+        stack.append((check_xml.getroot(), test_xml.getroot()))
+        while len(stack) > 0:
+            check_node, test_node = stack.pop()
+
+            self.assertTrue(len(check_node) == len(test_node))
+            
+            # Check attributes
+            if check_node.attrib is not None:
+                self.assertTrue(len(check_node.attrib) == len(test_node.attrib))
+                for key in check_node.attrib:
+                    self.assertTrue(check_node.attrib[key] == test_node.attrib[key])
+            else:
+                self.assertTrue(test_node.attrib is None)
+            
+            if len(check_node) == 0:
+                self.assertTrue(check_node.text == test_node.text)
+            else:
+                [stack.append((c, t)) for c, t in zip(check_node, test_node)]
+            
+            
+        
+        os.remove(test_file)
     
-    def __get_file_path(self, file_name: str):
+    def __get_data_file(self, file_name: str):
         return os.path.join(os.path.dirname(__file__), 'data', file_name)
 
 
