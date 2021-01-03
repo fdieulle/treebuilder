@@ -155,22 +155,22 @@ class TestTreeBuilder(unittest.TestCase):
         
         builder = TreeBuilder()
         # Create 2 books in a bookstore
-        builder.expand('bookstore/book/title', ['Sapiens', 'Harry Potter'])
+        builder.expand('/bookstore/book/title', ['Sapiens', 'Harry Potter'])
         # Set the lang to all books
-        builder.set('bookstore/book/@lang', 'en')
+        builder.set('/bookstore/book/@lang', 'en')
         # Set the price to each book
-        builder.nest('bookstore/book/price', [39.95, 29.99])
+        builder.nest('/bookstore/book/price', [39.95, 29.99])
         # Duplicate each book to make 2 copies
-        builder.cross('bookstore/book/copy_number', [1, 2]) 
+        builder.cross('/bookstore/book/copy_number', [1, 2]) 
 
-        builder.set('bookstore/book[title=\'Harry Potter\']/author', 'J K. Rowling')
-        builder.set('bookstore/book[title=Sapiens]/author', 'Y N. Harari')
+        builder.set('/bookstore/book[title=\'Harry Potter\']/author', 'J K. Rowling')
+        builder.set('/bookstore/book[title=Sapiens]/author', 'Y N. Harari')
 
-        builder.set('bookstore/book[title=\'Harry Potter\']/details/published_year', '2005')
-        builder.set('bookstore/book[title=Sapiens]/details/published_year', '2014')
+        builder.set('/bookstore/book[title=\'Harry Potter\']/details/published_year', '2005')
+        builder.set('/bookstore/book[title=Sapiens]/details/published_year', '2014')
 
-        builder.expand('bookstore/book[title="Harry Potter"]/borrowers/borrower/name', [f'Client_{i+1}' for i in range(3)])
-        builder.expand('bookstore/book[title=Sapiens]/borrowers/borrower/name', [f'Client_{i+1}' for i in range(5)])
+        builder.expand('/bookstore/book[title="Harry Potter"]/borrowers/borrower/name', [f'Client_{i+1}' for i in range(3)])
+        builder.expand('/bookstore/book[title=Sapiens]/borrowers/borrower/name', [f'Client_{i+1}' for i in range(5)])
 
         file_name = 'bookstore_readme.xml'
         builder.to_xml(file_name)
@@ -178,7 +178,7 @@ class TestTreeBuilder(unittest.TestCase):
         check_file = self.__get_data_file(file_name)
         self.__check_xml_files(check_file, file_name)
 
-        os.remove(file_name)
+        #os.remove(file_name)
 
     def __check_xml_files(self, x_file, y_file):
         x_xml = ET.parse(x_file)

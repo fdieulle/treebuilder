@@ -169,6 +169,10 @@ class TreeBuilder:
             index, node, parent = queue.pop()
 
             step = split[index]
+            if step == '':
+                queue.appendleft((index + 1, node, parent))
+                continue
+
             tag, filter = self.__get_tag_and_filter(step)
 
             is_leaf = index == len(split) - 1
