@@ -104,7 +104,7 @@ Output
 </bookstore>
 ```
 
-# Set values in distinct sub trees
+### Set values in distinct sub trees
 
 We want add a details section for a book where we will store addtional informations like the publish year.
 
@@ -175,10 +175,10 @@ Output
       <published_year>2014</published_year>
     </details>
     <borrowers>
-	  <borrower><name>Client_1</name></borrower>
-	  <borrower><name>Client_3</name></borrower>
-	  <borrower><name>Client_5</name></borrower>
-	</borrowers>
+      <borrower><name>Client_1</name></borrower>
+      <borrower><name>Client_3</name></borrower>
+      <borrower><name>Client_5</name></borrower>
+    </borrowers>
   </book>
   <book lang="en">
     <title>Harry Potter</title>
@@ -189,9 +189,9 @@ Output
       <published_year>2005</published_year>
     </details>
     <borrowers>
-	  <borrower><name>Client_1</name></borrower>
-	  <borrower><name>Client_3</name></borrower>
-	</borrowers>
+      <borrower><name>Client_1</name></borrower>
+      <borrower><name>Client_3</name></borrower>
+    </borrowers>
   </book>
   <book lang="en">
     <title>Sapiens</title>
@@ -202,9 +202,9 @@ Output
       <published_year>2014</published_year>
     </details>
     <borrowers>
-	  <borrower><name>Client_2</name></borrower>
-	  <borrower><name>Client_4</name></borrower>
-	</borrowers>
+      <borrower><name>Client_2</name></borrower>
+      <borrower><name>Client_4</name></borrower>
+    </borrowers>
   </book>
   <book lang="en">
     <title>Harry Potter</title>
@@ -215,8 +215,8 @@ Output
       <published_year>2005</published_year>
     </details>
     <borrowers>
-	  <borrower><name>Client_2</name></borrower>
-	</borrowers>
+      <borrower><name>Client_2</name></borrower>
+    </borrowers>
   </book>
 </bookstore>
 ```
