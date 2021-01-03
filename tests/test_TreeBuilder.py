@@ -123,7 +123,6 @@ class TestTreeBuilder(unittest.TestCase):
         self.__check_files(test_file, self.__get_file_path('bookstore.xml'))
         os.remove(test_file)
 
-
     def __check_files(self, x: str, y: str):
         with open(x, mode='r') as f:
             x_content = f.read()
@@ -133,6 +132,7 @@ class TestTreeBuilder(unittest.TestCase):
     
     def __get_file_path(self, file_name: str):
         return os.path.join(os.path.dirname(__file__), 'data', file_name)
+
 
 if __name__ == '__main__':
     unittest.main()
