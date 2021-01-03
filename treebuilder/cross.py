@@ -24,7 +24,7 @@ def cross(source: List[Dict[str, Any]], entry: str, values: List[Any]) -> List[D
     Args:
         source (List[Dict[str, Any]]): Source list to cross.
         entry (str): Entry key under which values are stored.
-        values (List[Any]): List of values to expand.
+        values (List[Any]): List of values to cross.
 
     Returns:
         List[Dict[str, Any]]: The crossed list with `length = S x V`.
