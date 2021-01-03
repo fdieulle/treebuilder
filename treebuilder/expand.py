@@ -3,6 +3,39 @@ from typing import Any, Dict, List
 
 # Todo: maybe it should be better to returns an iterable instead of a list
 def expand(source: List[Dict[str, Any]], entry: str, values: List[Any]) -> List[Dict[str, Any]]:
+    """Expand source by a values list 
+
+    When both source and values have the same length, the expansion is applied only
+    on each source item by setting values to the entry key one by one.
+    If their length are different, the expansion can alsoe applies on either the source and 
+    values lists length.
+
+    The shorter list rolls until reaching the end of the longer by using a ring logic.
+    A list used as a ring means that when the end of this list is reached we go back to 
+    the first element then continue iteration.
+
+    Exemples:
+        >>> import treebuilder as tb
+        >>> x = []
+        >>> y = tb.expand(x, 'Name', ['Sapiens', 'Harry Potter', 'A Time of Mercy'])
+        >>> print(y)
+        >>> z = tb.expand(y, 'Id', [1, 2, 3])
+        >>> print(z)
+
+        >>> x = [{'Name': 'foo'}, {'Name': 'bar'}]
+        >>> y = tb.expand(x, 'Value', [1])
+        >>> print(y)
+        >>> y = tb.expand(x, 'Value', [1, 2, 3])
+        >>> print(y)
+
+    Args:
+        source (List[Dict[str, Any]]): Source list to expand.
+        entry (str): Entry key under which values are stored.
+        values (List[Any]): List of values to expand.
+
+    Returns:
+        List[Dict[str, Any]]: The expanded list.
+    """
     if len(values) == 0:
         return source
 
