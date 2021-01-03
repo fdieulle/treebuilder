@@ -27,13 +27,13 @@ import treebuilder as tb
 
 builder = tb.TreeBuilder()
 # Create 2 books in a bookstore
-builder.expand('bookstore/book/title', ['Sapiens', 'Harry Potter'])
+builder.expand('/bookstore/book/title', ['Sapiens', 'Harry Potter'])
 # Set the lang to all books
-builder.set('bookstore/book/@lang', 'en')
+builder.set('/bookstore/book/@lang', 'en')
 # Set the price to each book
-builder.nest('bookstore/book/price', [39.95, 29.99])
+builder.nest('/bookstore/book/price', [39.95, 29.99])
 # Duplicate each book to make 2 copies
-builder.cross('bookstore/book/copy_number', [1, 2]) 
+builder.cross('/bookstore/book/copy_number', [1, 2]) 
 
 builder.to_xml('bookstore.xml')
 ```
@@ -71,8 +71,8 @@ The next parts of this example suppose that you call `builder.to_xml('bookstore.
 We want now add the author for each book. Each book has its own author so we need to select a sub tree to apply the author.
 
 ```{python}
-builder.set('bookstore/book[title=\'Harry Potter\']/author', 'J K. Rowling')
-builder.set('bookstore/book[title=Sapiens]/author', 'Y N. Harari')
+builder.set('/bookstore/book[title=\'Harry Potter\']/author', 'J K. Rowling')
+builder.set('/bookstore/book[title=Sapiens]/author', 'Y N. Harari')
 ```
 Output
 ```{xml}
@@ -109,8 +109,8 @@ Output
 We want add a details section for a book where we will store addtional informations like the publish year.
 
 ```{python}
-builder.set('bookstore/book[title=\'Harry Potter\']/details/published_year', '2005')
-builder.set('bookstore/book[title=Sapiens]/details/published_year', '2014')
+builder.set('/bookstore/book[title=\'Harry Potter\']/details/published_year', '2005')
+builder.set('/bookstore/book[title=Sapiens]/details/published_year', '2014')
 ```
 Output
 ```{xml}
@@ -160,8 +160,8 @@ Now we want to set the list of calient which has borrowed books
 Let's that there is 5 people which borrow Spaiens and 3 Harry Potter
 
 ```{python}
-builder.expand('bookstore/book[title="Harry Potter"]/borrowers/borrower/name', [f'Client_{i+1}' for i in range(3)])
-builder.expand('bookstore/book[title=Sapiens]/borrowers/borrower/name', [f'Client_{i+1}' for i in range(5)])
+builder.expand('/bookstore/book[title="Harry Potter"]/borrowers/borrower/name', [f'Client_{i+1}' for i in range(3)])
+builder.expand('/bookstore/book[title=Sapiens]/borrowers/borrower/name', [f'Client_{i+1}' for i in range(5)])
 ```
 Output
 ```{xml}
