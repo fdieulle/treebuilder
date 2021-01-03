@@ -4,6 +4,10 @@
 
 It's a python package which helps you to build a tree data model to generate configuration files like XML or JSON for example.
 
+## Prerequisites
+
+* python 3.6 or higher
+
 ## Installation
 
 ```
