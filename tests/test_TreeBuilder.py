@@ -5,6 +5,7 @@ from treebuilder.constants import ATTRIBUTES
 import unittest
 import os
 from treebuilder.TreeBuilder import TreeBuilder
+from treebuilder.xml import to_xml_string
 
 
 class TestTreeBuilder(unittest.TestCase):
@@ -146,34 +147,63 @@ class TestTreeBuilder(unittest.TestCase):
         builder.to_xml(test_file)
 
         check_file = self.__get_data_file('bookstore.xml')
-        
-        check_xml = ET.parse(check_file)
-        test_xml = ET.parse(test_file)
-
-        stack = deque()
-        stack.append((check_xml.getroot(), test_xml.getroot()))
-        while len(stack) > 0:
-            check_node, test_node = stack.pop()
-
-            self.assertTrue(len(check_node) == len(test_node))
-            
-            # Check attributes
-            if check_node.attrib is not None:
-                self.assertTrue(len(check_node.attrib) == len(test_node.attrib))
-                for key in check_node.attrib:
-                    self.assertTrue(check_node.attrib[key] == test_node.attrib[key])
-            else:
-                self.assertTrue(test_node.attrib is None)
-            
-            if len(check_node) == 0:
-                self.assertTrue(check_node.text == test_node.text)
-            else:
-                [stack.append((c, t)) for c, t in zip(check_node, test_node)]
-            
-            
+        self.__check_xml_files(check_file, test_file)
         
         os.remove(test_file)
     
+    def test_doc_example(self):
+        
+        builder = TreeBuilder()
+        # Create 2 books in a bookstore
+        builder.expand('bookstore/book/title', ['Sapiens', 'Harry Potter'])
+        # Set the lang to all books
+        builder.set('bookstore/book/@lang', 'en')
+        # Set the price to each book
+        builder.nest('bookstore/book/price', [39.95, 29.99])
+        # Duplicate each book to make 2 copies
+        builder.cross('bookstore/book/copy_number', [1, 2]) 
+
+        builder.set('bookstore/book[title=\'Harry Potter\']/author', 'J K. Rowling')
+        builder.set('bookstore/book[title=Sapiens]/author', 'Y N. Harari')
+
+        builder.set('bookstore/book[title=\'Harry Potter\']/details/published_year', '2005')
+        builder.set('bookstore/book[title=Sapiens]/details/published_year', '2014')
+
+        builder.expand('bookstore/book[title="Harry Potter"]/borrowers/borrower/name', [f'Client_{i+1}' for i in range(3)])
+        builder.expand('bookstore/book[title=Sapiens]/borrowers/borrower/name', [f'Client_{i+1}' for i in range(5)])
+
+        file_name = 'bookstore_readme.xml'
+        builder.to_xml(file_name)
+
+        check_file = self.__get_data_file(file_name)
+        self.__check_xml_files(check_file, file_name)
+
+        os.remove(file_name)
+
+    def __check_xml_files(self, x_file, y_file):
+        x_xml = ET.parse(x_file)
+        y_xml = ET.parse(y_file)
+
+        stack = deque()
+        stack.append((x_xml.getroot(), y_xml.getroot()))
+        while len(stack) > 0:
+            x_node, y_node = stack.pop()
+
+            self.assertTrue(len(x_node) == len(y_node))
+            
+            # Check attributes
+            if x_node.attrib is not None:
+                self.assertTrue(len(x_node.attrib) == len(y_node.attrib))
+                for key in x_node.attrib:
+                    self.assertTrue(x_node.attrib[key] == y_node.attrib[key])
+            else:
+                self.assertTrue(y_node.attrib is None)
+            
+            if len(x_node) == 0:
+                self.assertTrue(x_node.text == y_node.text)
+            else:
+                [stack.append((c, t)) for c, t in zip(x_node, y_node)]
+
     def __get_data_file(self, file_name: str):
         return os.path.join(os.path.dirname(__file__), 'data', file_name)
 

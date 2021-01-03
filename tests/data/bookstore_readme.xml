@@ -1,0 +1,71 @@
+<?xml version="1.0" ?>
+<bookstore>
+	<book lang="en">
+		<title>Sapiens</title>
+		<price>39.95</price>
+		<copy_number>1</copy_number>
+		<author>Y N. Harari</author>
+		<details>
+			<published_year>2014</published_year>
+		</details>
+		<borrowers>
+			<borrower>
+				<name>Client_1</name>
+			</borrower>
+			<borrower>
+				<name>Client_3</name>
+			</borrower>
+			<borrower>
+				<name>Client_5</name>
+			</borrower>
+		</borrowers>
+	</book>
+	<book lang="en">
+		<title>Harry Potter</title>
+		<price>29.99</price>
+		<copy_number>1</copy_number>
+		<author>J K. Rowling</author>
+		<details>
+			<published_year>2005</published_year>
+		</details>
+		<borrowers>
+			<borrower>
+				<name>Client_1</name>
+			</borrower>
+			<borrower>
+				<name>Client_3</name>
+			</borrower>
+		</borrowers>
+	</book>
+	<book lang="en">
+		<title>Sapiens</title>
+		<price>39.95</price>
+		<copy_number>2</copy_number>
+		<author>Y N. Harari</author>
+		<details>
+			<published_year>2014</published_year>
+		</details>
+		<borrowers>
+			<borrower>
+				<name>Client_2</name>
+			</borrower>
+			<borrower>
+				<name>Client_4</name>
+			</borrower>
+		</borrowers>
+	</book>
+	<book lang="en">
+		<title>Harry Potter</title>
+		<price>29.99</price>
+		<copy_number>2</copy_number>
+		<author>J K. Rowling</author>
+		<details>
+			<published_year>2005</published_year>
+		</details>
+		<borrowers>
+			<borrower>
+				<name>Client_2</name>
+			</borrower>
+		</borrowers>
+	</book>
+</bookstore>
