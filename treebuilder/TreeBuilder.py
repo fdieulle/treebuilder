@@ -7,6 +7,7 @@ from treebuilder.FilterLexer import FilterLexer
 from treebuilder.FilterParser import FilterParser
 from treebuilder.expand import expand
 from treebuilder.cross import cross
+from treebuilder.nest import nest
 from treebuilder.xml import to_xml
 from treebuilder.json import to_json
 
@@ -24,6 +25,12 @@ class TreeBuilder:
     def expand(self, xpath: str, values: List[Any]) -> 'TreeBuilder':
         entry, items = self.__get_items(xpath)
         items = expand(items, entry, values)
+        self.__attach_items_to_tree(items, entry)
+        return self
+
+    def nest(self, xpath: str, values: List[Any]) -> 'TreeBuilder':
+        entry, items = self.__get_items(xpath)
+        items = nest(items, entry, values)
         self.__attach_items_to_tree(items, entry)
         return self
 
