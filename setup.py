@@ -8,7 +8,7 @@ def readme():
 
 setup(
     name='treebuilder',
-    version='0.1',
+    version='0.2',
     author='Fabien Dieulle',
     author_email='fabiendieulle@hotmail.fr',
     description='Build tree data model.',
