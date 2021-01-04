@@ -16,6 +16,7 @@ setup(
     long_description_content_type='text/markdown',
     url='https://github.com/fdieulle/treebuilder',
     packages=find_packages(),
+    install_requires=['sly'],
     zip_safe=False,
     classifiers=[
         "License :: OSI Approved :: MIT License",
