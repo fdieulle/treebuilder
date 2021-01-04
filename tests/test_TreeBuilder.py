@@ -1,7 +1,7 @@
 from collections import deque
 import json
 import xml.etree.ElementTree as ET
-from treebuilder.constants import ATTRIBUTES
+from treebuilder.constants import ATTRIBUTES, PARENT
 import unittest
 import os
 from treebuilder.TreeBuilder import TreeBuilder
@@ -178,7 +178,129 @@ class TestTreeBuilder(unittest.TestCase):
         check_file = self.__get_data_file(file_name)
         self.__check_xml_files(check_file, file_name)
 
-        #os.remove(file_name)
+        os.remove(file_name)
+
+    def test_expand_with_attributes(self):
+        builder = TreeBuilder()
+
+        builder.expand('Root/Node/Name', ['foo'])
+        builder.expand('Root/Node/@value', [1, 2])
+
+        root = builder.root
+        self.assertEqual(root['Root'][0]['Node'][0]['Name'], 'foo')
+        self.assertEqual(root['Root'][0]['Node'][0][ATTRIBUTES]['value'], 1)
+        self.assertEqual(root['Root'][0]['Node'][1]['Name'], 'foo')
+        self.assertEqual(root['Root'][0]['Node'][1][ATTRIBUTES]['value'], 2)
+
+    def test_cross_with_attributes(self):
+        builder = TreeBuilder()
+
+        builder.expand('Root/Node/Name', ['foo', 'bar'])
+        builder.cross('Root/Node/@value', [1, 2])
+
+        root = builder.root
+        self.assertEqual(root['Root'][0]['Node'][0]['Name'], 'foo')
+        self.assertEqual(root['Root'][0]['Node'][0][ATTRIBUTES]['value'], 1)
+        self.assertEqual(root['Root'][0]['Node'][1]['Name'], 'bar')
+        self.assertEqual(root['Root'][0]['Node'][1][ATTRIBUTES]['value'], 1)
+        self.assertEqual(root['Root'][0]['Node'][2]['Name'], 'foo')
+        self.assertEqual(root['Root'][0]['Node'][2][ATTRIBUTES]['value'], 2)
+        self.assertEqual(root['Root'][0]['Node'][3]['Name'], 'bar')
+        self.assertEqual(root['Root'][0]['Node'][3][ATTRIBUTES]['value'], 2)
+
+    def test_expand_with_attributes_and_filter(self):
+        builder = TreeBuilder()
+
+        builder.expand('Root/Node/Name', ['foo', 'bar'])
+        builder.expand('Root/Node[Name=foo]/@value', [1, 2])
+
+        root = builder.root
+        self.assertEqual(root['Root'][0]['Node'][0]['Name'], 'foo')
+        self.assertEqual(root['Root'][0]['Node'][0][ATTRIBUTES]['value'], 1)
+        self.assertEqual(root['Root'][0]['Node'][1]['Name'], 'bar')
+        self.assertTrue(ATTRIBUTES not in root['Root'][0]['Node'][1])
+        self.assertEqual(root['Root'][0]['Node'][2]['Name'], 'foo')
+        self.assertEqual(root['Root'][0]['Node'][2][ATTRIBUTES]['value'], 2)
+
+    def test_cross_with_attributes(self):
+        builder = TreeBuilder()
+
+        builder.expand('Root/Node/Name', ['foo', 'bar'])
+        builder.cross('Root/Node[Name=foo]/@value', [1, 2])
+
+        root = builder.root
+        self.assertEqual(root['Root'][0]['Node'][0]['Name'], 'foo')
+        self.assertEqual(root['Root'][0]['Node'][0][ATTRIBUTES]['value'], 1)
+        self.assertEqual(root['Root'][0]['Node'][1]['Name'], 'bar')
+        self.assertTrue(ATTRIBUTES not in root['Root'][0]['Node'][1])
+        self.assertEqual(root['Root'][0]['Node'][2]['Name'], 'foo')
+        self.assertEqual(root['Root'][0]['Node'][2][ATTRIBUTES]['value'], 2)
+
+    def test_cross_with_sub_node(self):
+        builder = TreeBuilder()
+
+        builder.expand('Root/Node/Name', ['foo', 'bar'])
+        values = [1, 2]
+        
+        empty_nodes = [[{}] for v in values]
+
+        builder.cross('Root/Node/SubNode', empty_nodes)
+        builder.nest('Root/Node[Name=foo]/SubNode/Value', values)
+        builder.nest('Root/Node[Name=bar]/SubNode/Value', values)
+
+        root = builder.root
+        self.assertEqual(root['Root'][0]['Node'][0]['Name'], 'foo')
+        self.assertEqual(root['Root'][0]['Node'][0]['SubNode'][0]['Value'], 1)
+        self.assertEqual(root['Root'][0]['Node'][1]['Name'], 'bar')
+        self.assertEqual(root['Root'][0]['Node'][1]['SubNode'][0]['Value'], 1)
+        self.assertEqual(root['Root'][0]['Node'][2]['Name'], 'foo')
+        self.assertEqual(root['Root'][0]['Node'][2]['SubNode'][0]['Value'], 2)
+        self.assertEqual(root['Root'][0]['Node'][3]['Name'], 'bar')
+        self.assertEqual(root['Root'][0]['Node'][3]['SubNode'][0]['Value'], 2)
+
+    def test_cross_with_sub_node_and_filter(self):
+        builder = TreeBuilder()
+
+        builder.expand('Root/Node/Name', ['foo', 'bar'])
+        values = [1, 2]
+
+        builder.cross('Root/Node/SubNode', [[{}] for v in values])
+        builder.nest('Root/Node[Name=foo]/SubNode/Value', values)
+
+        root = builder.root
+        self.assertEqual(root['Root'][0]['Node'][0]['Name'], 'foo')
+        self.assertEqual(root['Root'][0]['Node'][0]['SubNode'][0]['Value'], 1)
+        self.assertEqual(root['Root'][0]['Node'][1]['Name'], 'bar')
+        self.assertTrue('Value' not in root['Root'][0]['Node'][1]['SubNode'][0])
+        self.assertEqual(root['Root'][0]['Node'][2]['Name'], 'foo')
+        self.assertEqual(root['Root'][0]['Node'][2]['SubNode'][0]['Value'], 2)
+        self.assertEqual(root['Root'][0]['Node'][3]['Name'], 'bar')
+        self.assertTrue('Value' not in root['Root'][0]['Node'][3]['SubNode'][0])
+
+        builder.to_xml('test.xml')
+
+    def test_cross_with_sub_node_deeper(self):
+        builder = TreeBuilder()
+
+        builder.expand('Root/Node/Name', ['foo', 'bar'])
+        values = [1, 2]
+        sub_path = 'SubNode1/SubNode2/Value'
+        
+        split = sub_path.split('/')
+        builder.cross(f'Root/Node/{split[0]}', [[{}] for v in values])
+        builder.nest(f'Root/Node[Name=foo]/{sub_path}', values)
+        builder.nest(f'Root/Node[Name=bar]/{sub_path}', values)
+
+        root = builder.root
+        self.assertEqual(root['Root'][0]['Node'][0]['Name'], 'foo')
+        self.assertEqual(root['Root'][0]['Node'][0]['SubNode1'][0]['SubNode2'][0]['Value'], 1)
+        self.assertEqual(root['Root'][0]['Node'][1]['Name'], 'bar')
+        self.assertEqual(root['Root'][0]['Node'][1]['SubNode1'][0]['SubNode2'][0]['Value'], 1)
+        self.assertEqual(root['Root'][0]['Node'][2]['Name'], 'foo')
+        self.assertEqual(root['Root'][0]['Node'][2]['SubNode1'][0]['SubNode2'][0]['Value'], 2)
+        self.assertEqual(root['Root'][0]['Node'][3]['Name'], 'bar')
+        self.assertEqual(root['Root'][0]['Node'][3]['SubNode1'][0]['SubNode2'][0]['Value'], 2)
+
 
     def __check_xml_files(self, x_file, y_file):
         x_xml = ET.parse(x_file)

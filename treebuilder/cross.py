@@ -1,8 +1,9 @@
 from typing import Any, Dict, List
+import copy
 
 
 # Todo: maybe it should be better to returns an iterable instead of a list
-def cross(source: List[Dict[str, Any]], entry: str, values: List[Any]) -> List[Dict[str, Any]]:
+def cross(source: List[Dict[str, Any]], entry: str, values: List[Any], deep_copy: bool = True) -> List[Dict[str, Any]]:
     """Cross source with values
 
     Cross generate all combination between source items and values as `S x V`
@@ -25,6 +26,7 @@ def cross(source: List[Dict[str, Any]], entry: str, values: List[Any]) -> List[D
         source (List[Dict[str, Any]]): Source list to cross.
         entry (str): Entry key under which values are stored.
         values (List[Any]): List of values to cross.
+        deep_copy (bool): Make a deep copy on values for each usages. Default is True.
 
     Returns:
         List[Dict[str, Any]]: The crossed list with `length = S x V`.
@@ -36,14 +38,14 @@ def cross(source: List[Dict[str, Any]], entry: str, values: List[Any]) -> List[D
     if len(values) > 0:
         # First we modify the existing objects
         for item in source:
-            item[entry] = values[0]
+            item[entry] = copy.deepcopy(values[0]) if deep_copy else values[0]
             result.append(item)
 
     for value in values[1:len(values)]:
         for item in source:
-            copy = item.copy() # Todo: Proably need a deep copy here
-            copy[entry] = value
-            result.append(copy)
+            clone = item.copy()
+            clone[entry] = copy.deepcopy(value) if deep_copy else value
+            result.append(clone)
 
     return result
     

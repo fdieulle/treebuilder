@@ -25,12 +25,13 @@ class TreeBuilder:
         self.__lexer = FilterLexer()
         self.__parser = FilterParser()
 
-    def set(self, xpath: str, value: Any) -> 'TreeBuilder':
+    def set(self, xpath: str, value: Any, deep_copy: bool = True) -> 'TreeBuilder':
         """Set value for a tree sub set
 
         Args:
             xpath: (str): The xpath to extract tree sub set
             value: (Any): The value to apply for each leaf found.
+            deep_copy (bool): Make a deep copy on values for each usages. Default is True.
 
         Examples:
             >>> import treebuilder as tb
@@ -43,9 +44,9 @@ class TreeBuilder:
         Returns:
             TreeBuilder: Returns the builder itself.
         """
-        return self.expand(xpath, [value])
+        return self.expand(xpath, [value], deep_copy)
 
-    def expand(self, xpath: str, values: List[Any]) -> 'TreeBuilder':
+    def expand(self, xpath: str, values: List[Any], deep_copy: bool = True) -> 'TreeBuilder':
         """Expand the sub set tree with values
 
         This fuction use the `treebuilder.expand`. The source list is the tree sub 
@@ -55,6 +56,7 @@ class TreeBuilder:
         Args:
             xpath: (str): The xpath to extract tree sub set
             value: (List[Any]): Values to apply for each leaf found.
+            deep_copy (bool): Make a deep copy on values for each usages. Default is True.
 
         Examples:
             >>> import treebuilder as tb
@@ -68,11 +70,11 @@ class TreeBuilder:
             TreeBuilder: Returns the builder itself.
         """
         entry, items = self.__get_items(xpath)
-        items = expand(items, entry, values)
+        items = expand(items, entry, values, deep_copy)
         self.__attach_items_to_tree(items, entry)
         return self
 
-    def nest(self, xpath: str, values: List[Any]) -> 'TreeBuilder':
+    def nest(self, xpath: str, values: List[Any], deep_copy: bool = True) -> 'TreeBuilder':
         """Nest the sub set tree with values.
 
         This fuction use the `treebuilder.nest`. The source list is the tree sub 
@@ -82,6 +84,7 @@ class TreeBuilder:
         Args:
             xpath: (str): The xpath to extract tree sub set
             value: (List[Any]): Values to apply for each leaf found.
+            deep_copy (bool): Make a deep copy on values for each usages. Default is True.
 
         Examples:
             >>> import treebuilder as tb
@@ -95,11 +98,11 @@ class TreeBuilder:
             TreeBuilder: Returns the builder itself.
         """
         entry, items = self.__get_items(xpath)
-        items = nest(items, entry, values)
+        items = nest(items, entry, values, deep_copy)
         self.__attach_items_to_tree(items, entry)
         return self
 
-    def cross(self, xpath: str, values: List[Any]) -> 'TreeBuilder':
+    def cross(self, xpath: str, values: List[Any], deep_copy: bool = True) -> 'TreeBuilder':
         """Cross the sub set tree with values.
 
         This fuction use the `treebuilder.cross`. The source list is the tree sub 
@@ -109,6 +112,7 @@ class TreeBuilder:
         Args:
             xpath: (str): The xpath to extract tree sub set
             value: (List[Any]): Values to apply for each leaf found.
+            deep_copy (bool): Make a deep copy on values for each usages. Default is True.
 
         Examples:
             >>> import treebuilder as tb
@@ -121,7 +125,7 @@ class TreeBuilder:
             TreeBuilder: Returns the builder itself.
         """
         entry, items = self.__get_items(xpath)
-        items = cross(items, entry, values)
+        items = cross(items, entry, values, deep_copy)
         self.__attach_items_to_tree(items, entry)
         return self
 

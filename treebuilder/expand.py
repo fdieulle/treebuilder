@@ -1,8 +1,9 @@
 from typing import Any, Dict, List
+import copy
 
 
 # Todo: maybe it should be better to returns an iterable instead of a list
-def expand(source: List[Dict[str, Any]], entry: str, values: List[Any]) -> List[Dict[str, Any]]:
+def expand(source: List[Dict[str, Any]], entry: str, values: List[Any], deep_copy: bool = True) -> List[Dict[str, Any]]:
     """Expand source by a values list 
 
     Expand generates combination of source and values one by one.
@@ -34,6 +35,7 @@ def expand(source: List[Dict[str, Any]], entry: str, values: List[Any]) -> List[
         source (List[Dict[str, Any]]): Source list to expand.
         entry (str): Entry key under which values are stored.
         values (List[Any]): List of values to expand.
+        deep_copy (bool): Make a deep copy on values for each usages. Default is True.
 
     Returns:
         List[Dict[str, Any]]: The expanded list.
@@ -50,7 +52,7 @@ def expand(source: List[Dict[str, Any]], entry: str, values: List[Any]) -> List[
             index = 0
             should_expand_source = False
         
-        item[entry] = values[index]
+        item[entry] = copy.deepcopy(values[index]) if deep_copy else values[index]
         index += 1
         result.append(item)
 
@@ -62,14 +64,14 @@ def expand(source: List[Dict[str, Any]], entry: str, values: List[Any]) -> List[
                 for item in source:
                     if index == len(values):
                         break
-                    copy = item.copy() # Todo: Proably need a deep copy here
-                    copy[entry] = values[index]
+                    clone = item.copy() 
+                    clone[entry] = copy.deepcopy(values[index]) if deep_copy else values[index]
                     index += 1
-                    result.append(copy)
+                    result.append(clone)
         else:
             # The source is empty so we build from values
             while index < len(values):
-                result.append({ entry: values[index] })
+                result.append({ entry: copy.deepcopy(values[index]) if deep_copy else values[index] })
                 index += 1
     
     return result
