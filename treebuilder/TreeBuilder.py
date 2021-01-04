@@ -202,19 +202,23 @@ class TreeBuilder:
 
     def __attach_items_to_tree(self, items: List[Dict[str, Any]], entry: str):
         is_attribute = entry.startswith('@')
+        att_entry = entry[1:len(entry)] if is_attribute else None
         
-        if is_attribute:
-            att_entry = entry[1:len(entry)] # Remove the @
-            for item in items:
-                
+        # Todo: Improve complexity here by keeping a reference of the current parent and
+        # playing with indices instead. This is possible because the order is kept by 
+        # expand and cross functions.
+        # This trick will avoid to iterate for each item on the full parent list and
+        # improve the complexity from O(N x M) to O(N + M) where N is the number of 
+        # created/updated items and M the number for items in the parent list which grows
+        # in this loop
+        for item in items:
+            if item not in item[PARENT]:
+                item[PARENT].append(item)
+            item.pop(PARENT)
+
+            if is_attribute:
                 if ATTRIBUTES not in item:
                     item[ATTRIBUTES] = {}
-
                 item[ATTRIBUTES][att_entry] = item[entry]
                 item.pop(entry)
-                item.pop(PARENT)
-        else:
-            for item in items:
-                if item not in item[PARENT]:
-                    item[PARENT].append(item)
-                item.pop(PARENT)
+            
