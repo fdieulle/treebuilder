@@ -148,6 +148,27 @@ class TreeBuilder:
         """
         to_json(self.__root, file_path, pretty=pretty)
     
+    def get_items(self, xpath: str) -> List[Any]:
+        """Get sub set tree elements
+
+        Args:
+            xpath (str): The xpath to extract tree sub set
+
+        Returns:
+            List[Any]: Returns the sub set tree elements find by the xpath.
+        """
+        # Todo: see how to share more code with __attach_items_to_tree
+        entry, items = self.__get_items(xpath)
+        
+        # Remove internal stuff
+        [item.pop(PARENT) for item in items]
+
+        if entry.startswith('@'): # It's an attribute
+            entry = entry[1:len(entry)]
+            return [x[ATTRIBUTES][entry] if ATTRIBUTES in x and entry in x[ATTRIBUTES] else None for x in items]
+
+        return [x[entry] if entry in x else None for x in items]
+
     def __get_tag_and_filter(self, step: str) -> Tuple[str, str]:
         split = step.split('[')
         tag, filter = split[0], None
