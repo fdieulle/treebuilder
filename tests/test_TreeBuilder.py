@@ -1,4 +1,5 @@
 from collections import deque
+from itertools import repeat
 import json
 import xml.etree.ElementTree as ET
 from treebuilder.constants import ATTRIBUTES, PARENT
@@ -300,6 +301,29 @@ class TestTreeBuilder(unittest.TestCase):
         self.assertEqual(root['Root'][0]['Node'][2]['SubNode1'][0]['SubNode2'][0]['Value'], 2)
         self.assertEqual(root['Root'][0]['Node'][3]['Name'], 'bar')
         self.assertEqual(root['Root'][0]['Node'][3]['SubNode1'][0]['SubNode2'][0]['Value'], 2)
+
+    def test_get_items(self):
+        builder = TreeBuilder()
+
+        builder.expand('/bookstore/book/title', ['Sapiens', 'Harry Potter'])
+        builder.set('/bookstore/book/@lang', 'en')
+        builder.nest('/bookstore/book/price', [39.95, 29.99])
+        builder.cross('/bookstore/book/copy_number', ['1', '2']) 
+
+        titles = builder.get_items('/bookstore/book/title')
+        self.assertTrue(titles == ['Sapiens', 'Harry Potter', 'Sapiens', 'Harry Potter'])
+
+        langs = builder.get_items('/bookstore/book/@lang')
+        self.assertTrue(langs == [x for x in repeat('en', 4)])
+
+        books = builder.get_items('/bookstore/book')[0]
+        self.assertTrue(len(books) == 4)
+
+        copy_numbers = [x['copy_number'] for x in books]
+        self.assertTrue(copy_numbers == ['1', '1', '2', '2'])
+
+        titles = builder.get_items('/bookstore/book[copy_number=2]/title')
+        self.assertTrue(titles == ['Sapiens', 'Harry Potter'])
 
 
     def __check_xml_files(self, x_file, y_file):
