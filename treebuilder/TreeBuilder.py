@@ -46,7 +46,7 @@ class TreeBuilder:
         """
         return self.expand(xpath, [value], deep_copy)
 
-    def expand(self, xpath: str, values: List[Any], deep_copy: bool = True) -> 'TreeBuilder':
+    def expand(self, xpath: str, values: List[Any], deep_copy: bool = True, from_ancestor: str = None) -> 'TreeBuilder':
         """Expand the sub set tree with values
 
         This fuction use the `treebuilder.expand`. The source list is the tree sub 
@@ -57,6 +57,7 @@ class TreeBuilder:
             xpath: (str): The xpath to extract tree sub set
             value: (List[Any]): Values to apply for each leaf found.
             deep_copy (bool): Make a deep copy on values for each usages. Default is True.
+            from_ancestor (str): Select from which ancestor node you want to expand
 
         Examples:
             >>> import treebuilder as tb
@@ -69,9 +70,20 @@ class TreeBuilder:
         Returns:
             TreeBuilder: Returns the builder itself.
         """
-        entry, items = self.__get_items(xpath)
+        entry, items = self.__get_items(xpath, from_ancestor)
+
+        if from_ancestor is not None and len(values) > len(items):
+            # Generate ancestor nodes
+            nodes = self.__generate_ancestor_nodes_as_values(items, entry, len(values))
+            items = expand(items, entry, nodes, deep_copy)
+            self.__attach_items_to_tree(items, entry)
+
+            # Apply values (no more expansions)
+            return self.expand(xpath, values, deep_copy)
+
         items = expand(items, entry, values, deep_copy)
         self.__attach_items_to_tree(items, entry)
+
         return self
 
     def nest(self, xpath: str, values: List[Any], deep_copy: bool = True) -> 'TreeBuilder':
@@ -100,9 +112,10 @@ class TreeBuilder:
         entry, items = self.__get_items(xpath)
         items = nest(items, entry, values, deep_copy)
         self.__attach_items_to_tree(items, entry)
+
         return self
 
-    def cross(self, xpath: str, values: List[Any], deep_copy: bool = True) -> 'TreeBuilder':
+    def cross(self, xpath: str, values: List[Any], deep_copy: bool = True, from_ancestor: str = None) -> 'TreeBuilder':
         """Cross the sub set tree with values.
 
         This fuction use the `treebuilder.cross`. The source list is the tree sub 
@@ -113,6 +126,7 @@ class TreeBuilder:
             xpath: (str): The xpath to extract tree sub set
             value: (List[Any]): Values to apply for each leaf found.
             deep_copy (bool): Make a deep copy on values for each usages. Default is True.
+            from_ancestor (str): Select from which ancestor node you want to expand
 
         Examples:
             >>> import treebuilder as tb
@@ -123,10 +137,27 @@ class TreeBuilder:
 
         Returns:
             TreeBuilder: Returns the builder itself.
-        """
-        entry, items = self.__get_items(xpath)
-        items = cross(items, entry, values, deep_copy)
-        self.__attach_items_to_tree(items, entry)
+        """            
+        entry, items = self.__get_items(xpath, from_ancestor)
+
+        if from_ancestor is not None and len(values) != 0:
+            # Generate ancestors
+            nodes = self.__generate_ancestor_nodes_as_values(items, entry, len(items) * len(values))
+            items = expand(items, entry, nodes, deep_copy)
+            self.__attach_items_to_tree(items, entry)
+
+            # Generate crossed values
+            repeats = int(len(items) / len(values))
+            crossed_values = []
+            for value in values:
+                crossed_values += [value for x in range(repeats)]
+            
+            # Apply values (no more expansions)
+            self.expand(xpath, crossed_values, deep_copy)
+        else:
+            items = cross(items, entry, values, deep_copy)
+            self.__attach_items_to_tree(items, entry)
+
         return self
 
     def to_xml(self, file_path: str, root: str = None, pretty: bool = True):
@@ -184,8 +215,9 @@ class TreeBuilder:
         tokens = self.__lexer.tokenize(syntax)
         return self.__parser.parse(tokens)
 
-    def __get_items(self, xpath: str) -> Tuple[str, List[Dict[str, Any]]]: 
+    def __get_items(self, xpath: str, from_ancestor: str = None) -> Tuple[str, List[Dict[str, Any]]]: 
         split = xpath.split('/')
+        max_depth = len(split) - 1
 
         result = []
         queue = deque()
@@ -200,7 +232,10 @@ class TreeBuilder:
 
             tag, filter = self.__get_tag_and_filter(step)
 
-            is_leaf = index == len(split) - 1
+            if tag == from_ancestor:
+                max_depth = index + 1
+
+            is_leaf = index == max_depth
             if is_leaf:
                 node[PARENT] = parent
                 result.append(node)
@@ -223,8 +258,22 @@ class TreeBuilder:
                 for child in items:
                     queue.appendleft((index + 1, child, node[tag]))
         
-        return split[-1], result
+        return split[max_depth], result
 
+    def __generate_ancestor_nodes_as_values(self, items, entry, target_length):
+        i, values = 0, []
+
+        while i < target_length:
+            for item in items:
+                values.append(item[entry] if entry in item else [{}])
+                
+                i += 1
+                if i >= target_length:
+                    break
+        
+        return values
+        
+        
     def __attach_items_to_tree(self, items: List[Dict[str, Any]], entry: str):
         is_attribute = entry.startswith('@')
         att_entry = entry[1:len(entry)] if is_attribute else None
