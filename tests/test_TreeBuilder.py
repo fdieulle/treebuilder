@@ -278,8 +278,6 @@ class TestTreeBuilder(unittest.TestCase):
         self.assertEqual(root['Root'][0]['Node'][3]['Name'], 'bar')
         self.assertTrue('Value' not in root['Root'][0]['Node'][3]['SubNode'][0])
 
-        builder.to_xml('test.xml')
-
     def test_cross_with_sub_node_deeper(self):
         builder = TreeBuilder()
 
