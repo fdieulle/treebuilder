@@ -179,11 +179,13 @@ class TreeBuilder:
         """
         to_json(self.__root, file_path, pretty=pretty)
     
-    def get_items(self, xpath: str) -> List[Any]:
+    def get_items(self, xpath: str, unlist: bool = True) -> List[Any]:
         """Get sub set tree elements
 
         Args:
             xpath (str): The xpath to extract tree sub set
+            unlist (bool): Unlist nodes if they are request. If you request leaves which 
+                are type of list you should set this parameter to False. True by default.
 
         Returns:
             List[Any]: Returns the sub set tree elements find by the xpath.
@@ -198,7 +200,17 @@ class TreeBuilder:
             entry = entry[1:len(entry)]
             return [x[ATTRIBUTES][entry] if ATTRIBUTES in x and entry in x[ATTRIBUTES] else None for x in items]
 
-        return [x[entry] if entry in x else None for x in items]
+        items = [x[entry] if entry in x else None for x in items]
+        if not unlist:
+            return items
+
+        result = []
+        for item in items:
+            if type(item) is list:
+                [result.append(x) for x in item]
+            else:
+                result.append(item)
+        return result
 
     def __get_tag_and_filter(self, step: str) -> Tuple[str, str]:
         split = step.split('[')

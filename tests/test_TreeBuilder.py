@@ -307,8 +307,8 @@ class TestTreeBuilder(unittest.TestCase):
 
         builder.expand('/bookstore/book/title', ['Sapiens', 'Harry Potter'])
         builder.set('/bookstore/book/@lang', 'en')
-        builder.nest('/bookstore/book/price', [39.95, 29.99])
-        builder.cross('/bookstore/book/copy_number', ['1', '2']) 
+        builder.nest('/bookstore/book/price', ['$39.95', '$29.99'])
+        builder.cross('/bookstore/book/details/copy_number', ['1', '2'], from_ancestor='book') 
 
         titles = builder.get_items('/bookstore/book/title')
         self.assertTrue(titles == ['Sapiens', 'Harry Potter', 'Sapiens', 'Harry Potter'])
@@ -316,14 +316,18 @@ class TestTreeBuilder(unittest.TestCase):
         langs = builder.get_items('/bookstore/book/@lang')
         self.assertTrue(langs == [x for x in repeat('en', 4)])
 
-        books = builder.get_items('/bookstore/book')[0]
+        books = builder.get_items('/bookstore/book')
         self.assertTrue(len(books) == 4)
 
-        copy_numbers = [x['copy_number'] for x in books]
-        self.assertTrue(copy_numbers == ['1', '1', '2', '2'])
+        prices = [x['price'] for x in books]
+        self.assertTrue(prices == ['$39.95', '$29.99', '$39.95', '$29.99'])
 
-        titles = builder.get_items('/bookstore/book[copy_number=2]/title')
-        self.assertTrue(titles == ['Sapiens', 'Harry Potter'])
+        titles = builder.get_items('/bookstore/book[price="$29.99"]/title')
+        self.assertTrue(titles == ['Harry Potter', 'Harry Potter'])
+
+        details = builder.get_items('/bookstore/book[price="$29.99"]/details')
+        copy_numbers = [x['copy_number'] for x in details]
+        self.assertTrue(copy_numbers == ['1', '2'])
 
     def test_expand_from_ancestor(self):
         builder = TreeBuilder()
