@@ -3,8 +3,8 @@
 [![Build Status](https://travis-ci.com/fdieulle/treebuilder.svg?branch=main)](https://travis-ci.com/github/fdieulle/treebuilder)
 
 `treebuilder` is a python package which helps you to **build a tree data model** like XML or JSON configuration files.<br />
-All operations of insert/update are vectorized.<br />
-The `xpath` syntax is supported to select sub set trees recursively where your operations will apply.
+All **operations** of insert/update are **vectorized**.<br />
+The **`xpath`** syntax is supported to **select sub set trees recursively** where your operations will apply.
 
 ## Prerequisites
 

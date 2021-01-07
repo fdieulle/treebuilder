@@ -278,8 +278,6 @@ class TestTreeBuilder(unittest.TestCase):
         self.assertEqual(root['Root'][0]['Node'][3]['Name'], 'bar')
         self.assertTrue('Value' not in root['Root'][0]['Node'][3]['SubNode'][0])
 
-        builder.to_xml('test.xml')
-
     def test_cross_with_sub_node_deeper(self):
         builder = TreeBuilder()
 
@@ -307,8 +305,8 @@ class TestTreeBuilder(unittest.TestCase):
 
         builder.expand('/bookstore/book/title', ['Sapiens', 'Harry Potter'])
         builder.set('/bookstore/book/@lang', 'en')
-        builder.nest('/bookstore/book/price', [39.95, 29.99])
-        builder.cross('/bookstore/book/copy_number', ['1', '2']) 
+        builder.nest('/bookstore/book/price', ['$39.95', '$29.99'])
+        builder.cross('/bookstore/book/details/copy_number', ['1', '2'], from_ancestor='book') 
 
         titles = builder.get_items('/bookstore/book/title')
         self.assertTrue(titles == ['Sapiens', 'Harry Potter', 'Sapiens', 'Harry Potter'])
@@ -316,14 +314,108 @@ class TestTreeBuilder(unittest.TestCase):
         langs = builder.get_items('/bookstore/book/@lang')
         self.assertTrue(langs == [x for x in repeat('en', 4)])
 
-        books = builder.get_items('/bookstore/book')[0]
+        books = builder.get_items('/bookstore/book')
         self.assertTrue(len(books) == 4)
 
-        copy_numbers = [x['copy_number'] for x in books]
-        self.assertTrue(copy_numbers == ['1', '1', '2', '2'])
+        prices = [x['price'] for x in books]
+        self.assertTrue(prices == ['$39.95', '$29.99', '$39.95', '$29.99'])
 
-        titles = builder.get_items('/bookstore/book[copy_number=2]/title')
-        self.assertTrue(titles == ['Sapiens', 'Harry Potter'])
+        titles = builder.get_items('/bookstore/book[price="$29.99"]/title')
+        self.assertTrue(titles == ['Harry Potter', 'Harry Potter'])
+
+        details = builder.get_items('/bookstore/book[price="$29.99"]/details')
+        copy_numbers = [x['copy_number'] for x in details]
+        self.assertTrue(copy_numbers == ['1', '2'])
+
+    def test_expand_from_ancestor(self):
+        builder = TreeBuilder()
+
+        builder.expand('/bookstore/book/title', ['Sapiens', 'Harry Potter'])
+        builder.expand('/bookstore/book/details/copy_number', [1, 2, 3], from_ancestor='book')
+
+        root = builder.root
+        self.assertEqual(root['bookstore'][0]['book'][0]['title'], 'Sapiens')
+        self.assertEqual(root['bookstore'][0]['book'][0]['details'][0]['copy_number'], 1)
+        self.assertEqual(root['bookstore'][0]['book'][1]['title'], 'Harry Potter')
+        self.assertEqual(root['bookstore'][0]['book'][1]['details'][0]['copy_number'], 2)
+        self.assertEqual(root['bookstore'][0]['book'][2]['title'], 'Sapiens')
+        self.assertEqual(root['bookstore'][0]['book'][2]['details'][0]['copy_number'], 3)
+        self.assertTrue(len(root['bookstore'][0]['book']) == 3)
+
+    def test_expand_from_ancestor_with_an_existing_sub_tree(self):
+        builder = TreeBuilder()
+
+        builder.expand('/bookstore/book/title', ['Sapiens', 'Harry Potter'])
+        builder.expand('/bookstore/book/price', [39.95, 29.99])
+        builder.expand('/bookstore/book/details/published_year', [2014, 2005])
+        builder.expand('/bookstore/book/details/copy_number', [1, 1, 2, 2], from_ancestor='book')
+
+        root = builder.root
+        self.assertEqual(root['bookstore'][0]['book'][0]['title'], 'Sapiens')
+        self.assertEqual(root['bookstore'][0]['book'][0]['price'], 39.95)
+        self.assertEqual(root['bookstore'][0]['book'][0]['details'][0]['published_year'], 2014)
+        self.assertEqual(root['bookstore'][0]['book'][0]['details'][0]['copy_number'], 1)
+        self.assertEqual(root['bookstore'][0]['book'][1]['title'], 'Harry Potter')
+        self.assertEqual(root['bookstore'][0]['book'][1]['price'], 29.99)
+        self.assertEqual(root['bookstore'][0]['book'][1]['details'][0]['published_year'], 2005)
+        self.assertEqual(root['bookstore'][0]['book'][1]['details'][0]['copy_number'], 1)
+        self.assertEqual(root['bookstore'][0]['book'][2]['title'], 'Sapiens')
+        self.assertEqual(root['bookstore'][0]['book'][2]['price'], 39.95)
+        self.assertEqual(root['bookstore'][0]['book'][2]['details'][0]['published_year'], 2014)
+        self.assertEqual(root['bookstore'][0]['book'][2]['details'][0]['copy_number'], 2)
+        self.assertEqual(root['bookstore'][0]['book'][3]['title'], 'Harry Potter')
+        self.assertEqual(root['bookstore'][0]['book'][3]['price'], 29.99)
+        self.assertEqual(root['bookstore'][0]['book'][3]['details'][0]['published_year'], 2005)
+        self.assertEqual(root['bookstore'][0]['book'][3]['details'][0]['copy_number'], 2)
+        self.assertTrue(len(root['bookstore'][0]['book']) == 4)
+
+    def test_cross_from_ancestor(self):
+        builder = TreeBuilder()
+
+        builder.expand('/bookstore/book/title', ['Sapiens', 'Harry Potter'])
+        builder.cross('/bookstore/book/details/copy_number', [1, 2, 3], from_ancestor='book')
+
+        root = builder.root
+        self.assertEqual(root['bookstore'][0]['book'][0]['title'], 'Sapiens')
+        self.assertEqual(root['bookstore'][0]['book'][0]['details'][0]['copy_number'], 1)
+        self.assertEqual(root['bookstore'][0]['book'][1]['title'], 'Harry Potter')
+        self.assertEqual(root['bookstore'][0]['book'][1]['details'][0]['copy_number'], 1)
+        self.assertEqual(root['bookstore'][0]['book'][2]['title'], 'Sapiens')
+        self.assertEqual(root['bookstore'][0]['book'][2]['details'][0]['copy_number'], 2)
+        self.assertEqual(root['bookstore'][0]['book'][3]['title'], 'Harry Potter')
+        self.assertEqual(root['bookstore'][0]['book'][3]['details'][0]['copy_number'], 2)
+        self.assertEqual(root['bookstore'][0]['book'][4]['title'], 'Sapiens')
+        self.assertEqual(root['bookstore'][0]['book'][4]['details'][0]['copy_number'], 3)
+        self.assertEqual(root['bookstore'][0]['book'][5]['title'], 'Harry Potter')
+        self.assertEqual(root['bookstore'][0]['book'][5]['details'][0]['copy_number'], 3)
+        self.assertTrue(len(root['bookstore'][0]['book']) == 6)
+
+    def test_cross_from_ancestor_with_an_existing_sub_tree(self):
+        builder = TreeBuilder()
+
+        builder.expand('/bookstore/book/title', ['Sapiens', 'Harry Potter'])
+        builder.expand('/bookstore/book/price', [39.95, 29.99])
+        builder.expand('/bookstore/book/details/published_year', [2014, 2005])
+        builder.cross('/bookstore/book/details/copy_number', [1, 2], from_ancestor='book')
+
+        root = builder.root
+        self.assertEqual(root['bookstore'][0]['book'][0]['title'], 'Sapiens')
+        self.assertEqual(root['bookstore'][0]['book'][0]['price'], 39.95)
+        self.assertEqual(root['bookstore'][0]['book'][0]['details'][0]['published_year'], 2014)
+        self.assertEqual(root['bookstore'][0]['book'][0]['details'][0]['copy_number'], 1)
+        self.assertEqual(root['bookstore'][0]['book'][1]['title'], 'Harry Potter')
+        self.assertEqual(root['bookstore'][0]['book'][1]['price'], 29.99)
+        self.assertEqual(root['bookstore'][0]['book'][1]['details'][0]['published_year'], 2005)
+        self.assertEqual(root['bookstore'][0]['book'][1]['details'][0]['copy_number'], 1)
+        self.assertEqual(root['bookstore'][0]['book'][2]['title'], 'Sapiens')
+        self.assertEqual(root['bookstore'][0]['book'][2]['price'], 39.95)
+        self.assertEqual(root['bookstore'][0]['book'][2]['details'][0]['published_year'], 2014)
+        self.assertEqual(root['bookstore'][0]['book'][2]['details'][0]['copy_number'], 2)
+        self.assertEqual(root['bookstore'][0]['book'][3]['title'], 'Harry Potter')
+        self.assertEqual(root['bookstore'][0]['book'][3]['price'], 29.99)
+        self.assertEqual(root['bookstore'][0]['book'][3]['details'][0]['published_year'], 2005)
+        self.assertEqual(root['bookstore'][0]['book'][3]['details'][0]['copy_number'], 2)
+        self.assertTrue(len(root['bookstore'][0]['book']) == 4)
 
 
     def __check_xml_files(self, x_file, y_file):
