@@ -6,9 +6,14 @@ python:
  - "3.9"
 install:
  - pip install -r requirements.txt
+ - pip install codecov
+ - pip install pytest-cov
  - pip install .
 script: 
- - pytest tests/
+ - pytest --cov-report=xml --cov=deeptabular tests/
+
+after_success:
+ - codecov -t $CODECOV_TOKEN
 
 deploy:
  provider: pypi
