@@ -72,11 +72,12 @@ class TreeBuilder:
         """
         entry, items = self.__get_items(xpath, from_ancestor)
 
-        if from_ancestor is not None and len(values) > len(items):
-            # Generate ancestor nodes
-            nodes = self.__generate_ancestor_nodes_as_values(items, entry, len(values))
-            items = expand(items, entry, nodes, deep_copy)
-            self.__attach_items_to_tree(items, entry)
+        if from_ancestor is not None:
+            # Generate ancestor nodes noly if needed
+            if len(values) > len(items):
+                nodes = self.__generate_ancestor_nodes_as_values(items, entry, len(values))
+                items = expand(items, entry, nodes, deep_copy)
+                self.__attach_items_to_tree(items, entry)
 
             # Apply values (no more expansions)
             return self.expand(xpath, values, deep_copy)

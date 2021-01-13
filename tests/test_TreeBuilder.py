@@ -376,6 +376,19 @@ def test_expand_from_ancestor():
     assert len(root['bookstore'][0]['book']) == 3
 
 
+def test_expand_from_ancestor_without_expansion():
+    builder = TreeBuilder()
+
+    builder.expand('/bookstore/book/title', ['Sapiens', 'Harry Potter'])
+    builder.expand('/bookstore/book/details/copy_number', [1], from_ancestor='book')
+
+    root = builder.root
+    assert root['bookstore'][0]['book'][0]['title'], 'Sapiens'
+    assert root['bookstore'][0]['book'][0]['details'][0]['copy_number'], 1
+    assert root['bookstore'][0]['book'][1]['title'], 'Harry Potter'
+    assert root['bookstore'][0]['book'][1]['details'][0]['copy_number'], 1
+    assert len(root['bookstore'][0]['book']) == 2
+
 def test_expand_from_ancestor_with_an_existing_sub_tree():
     builder = TreeBuilder()
 
