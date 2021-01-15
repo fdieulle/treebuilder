@@ -2,7 +2,7 @@ from collections import deque
 from itertools import repeat
 import json
 import xml.etree.ElementTree as ET
-from treebuilder.constants import ATTRIBUTES
+from treebuilder.constants import ATTRIBUTES, PARENT
 import os
 from treebuilder.TreeBuilder import TreeBuilder
 from treebuilder.xml import to_xml_string
@@ -504,4 +504,42 @@ def test_node_deep_copy_with_cross():
     assert root['bookstore'][0]['book'][1]['details'][0][ATTRIBUTES]['lang'] == 'en'
     assert root['bookstore'][0]['book'][1]['details'][0]['published_year'] == 2005
     assert root['bookstore'][0]['book'][1]['details'][0]['copy_number'] == 2
+    assert len(root['bookstore'][0]['book']) == 2
+
+
+def test_node_no_parent_remains_with_expand():
+    builder = TreeBuilder()
+
+    builder.expand('bookstore/book/details/@lang', ['en'])
+    builder.expand('bookstore/book/title', ['Sapiens', 'Harry Potter'])
+    builder.expand('bookstore/book/details/published_year', [2014, 2005], from_ancestor='book')
+
+    root = builder.root
+    assert root['bookstore'][0]['book'][0]['title'] == 'Sapiens'
+    assert root['bookstore'][0]['book'][0]['details'][0][ATTRIBUTES]['lang'] == 'en'
+    assert root['bookstore'][0]['book'][0]['details'][0]['published_year'] == 2014
+    assert PARENT not in root['bookstore'][0]['book'][0]
+    assert root['bookstore'][0]['book'][1]['title'] == 'Harry Potter'
+    assert root['bookstore'][0]['book'][1]['details'][0][ATTRIBUTES]['lang'] == 'en'
+    assert root['bookstore'][0]['book'][1]['details'][0]['published_year'] == 2005
+    assert PARENT not in root['bookstore'][0]['book'][1]
+    assert len(root['bookstore'][0]['book']) == 2
+
+
+def test_node_no_parent_remains_with_cross():
+    builder = TreeBuilder()
+
+    builder.expand('bookstore/book/details/@lang', ['en'])
+    builder.expand('bookstore/book/title', ['Sapiens', 'Harry Potter'])
+    builder.cross('bookstore/book/details/copy_number', [1], from_ancestor='book')
+
+    root = builder.root
+    assert root['bookstore'][0]['book'][0]['title'] == 'Sapiens'
+    assert root['bookstore'][0]['book'][0]['details'][0][ATTRIBUTES]['lang'] == 'en'
+    assert root['bookstore'][0]['book'][0]['details'][0]['copy_number'] == 1
+    assert PARENT not in root['bookstore'][0]['book'][0]
+    assert root['bookstore'][0]['book'][1]['title'] == 'Harry Potter'
+    assert root['bookstore'][0]['book'][1]['details'][0][ATTRIBUTES]['lang'] == 'en'
+    assert root['bookstore'][0]['book'][1]['details'][0]['copy_number'] == 1
+    assert PARENT not in root['bookstore'][0]['book'][1]
     assert len(root['bookstore'][0]['book']) == 2
