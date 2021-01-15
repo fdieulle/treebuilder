@@ -78,6 +78,8 @@ class TreeBuilder:
                 nodes = self.__generate_ancestor_nodes_as_values(items, entry, len(values))
                 items = expand(items, entry, nodes, deep_copy)
                 self.__attach_items_to_tree(items, entry, parents)
+            else:
+                [item.pop(PARENT) for item in items]
 
             # Apply values (no more expansions)
             return self.expand(xpath, values, deep_copy)
