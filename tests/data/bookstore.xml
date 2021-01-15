@@ -2,7 +2,7 @@
 <bookstore xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<book xsi:type="Book">
 		<title>Sapiens</title>
-		<is_in_stock>True</is_in_stock>
+		<is_in_stock>true</is_in_stock>
 		<price>39.99</price>
 		<details>
 			<count>3</count>
@@ -10,7 +10,7 @@
 	</book>
 	<book xsi:type="Book">
 		<title>Harry Potter</title>
-		<is_in_stock>True</is_in_stock>
+		<is_in_stock>true</is_in_stock>
 		<price>9.99</price>
 		<details>
 			<count>3</count>
@@ -19,7 +19,7 @@
 	</book>
 	<book xsi:type="Book">
 		<title>A Time of Mercy</title>
-		<is_in_stock>True</is_in_stock>
+		<is_in_stock>true</is_in_stock>
 		<price>12.99</price>
 		<details>
 			<count>3</count>
