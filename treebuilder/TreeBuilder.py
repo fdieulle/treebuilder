@@ -70,20 +70,20 @@ class TreeBuilder:
         Returns:
             TreeBuilder: Returns the builder itself.
         """
-        entry, items = self.__get_items(xpath, from_ancestor)
+        entry, items, parents = self.__get_items(xpath, from_ancestor)
 
         if from_ancestor is not None:
             # Generate ancestor nodes noly if needed
             if len(values) > len(items):
                 nodes = self.__generate_ancestor_nodes_as_values(items, entry, len(values))
                 items = expand(items, entry, nodes, deep_copy)
-                self.__attach_items_to_tree(items, entry)
+                self.__attach_items_to_tree(items, entry, parents)
 
             # Apply values (no more expansions)
             return self.expand(xpath, values, deep_copy)
 
         items = expand(items, entry, values, deep_copy)
-        self.__attach_items_to_tree(items, entry)
+        self.__attach_items_to_tree(items, entry, parents)
 
         return self
 
@@ -110,9 +110,9 @@ class TreeBuilder:
         Returns:
             TreeBuilder: Returns the builder itself.
         """
-        entry, items = self.__get_items(xpath)
+        entry, items, parents = self.__get_items(xpath)
         items = nest(items, entry, values, deep_copy)
-        self.__attach_items_to_tree(items, entry)
+        self.__attach_items_to_tree(items, entry, parents)
 
         return self
 
@@ -139,13 +139,13 @@ class TreeBuilder:
         Returns:
             TreeBuilder: Returns the builder itself.
         """            
-        entry, items = self.__get_items(xpath, from_ancestor)
+        entry, items, parents = self.__get_items(xpath, from_ancestor)
 
         if from_ancestor is not None and len(values) != 0:
             # Generate ancestors
             nodes = self.__generate_ancestor_nodes_as_values(items, entry, len(items) * len(values))
             items = expand(items, entry, nodes, deep_copy)
-            self.__attach_items_to_tree(items, entry)
+            self.__attach_items_to_tree(items, entry, parents)
 
             # Generate crossed values
             repeats = int(len(items) / len(values))
@@ -157,7 +157,7 @@ class TreeBuilder:
             self.expand(xpath, crossed_values, deep_copy)
         else:
             items = cross(items, entry, values, deep_copy)
-            self.__attach_items_to_tree(items, entry)
+            self.__attach_items_to_tree(items, entry, parents)
 
         return self
 
@@ -192,7 +192,7 @@ class TreeBuilder:
             List[Any]: Returns the sub set tree elements find by the xpath.
         """
         # Todo: see how to share more code with __attach_items_to_tree
-        entry, items = self.__get_items(xpath)
+        entry, items, parents = self.__get_items(xpath)
         
         # Remove internal stuff
         [item.pop(PARENT) for item in items]
@@ -228,11 +228,11 @@ class TreeBuilder:
         tokens = self.__lexer.tokenize(syntax)
         return self.__parser.parse(tokens)
 
-    def __get_items(self, xpath: str, from_ancestor: str = None) -> Tuple[str, List[Dict[str, Any]]]: 
+    def __get_items(self, xpath: str, from_ancestor: str = None) -> Tuple[str, List[Dict[str, Any]], Dict[str, List]]: 
         split = xpath.split('/')
         max_depth = len(split) - 1
 
-        result = []
+        result, parents = [], {}
         queue = deque()
         queue.appendleft((0, self.__root, None))
         while len(queue) > 0:
@@ -250,7 +250,9 @@ class TreeBuilder:
 
             is_leaf = index == max_depth
             if is_leaf:
-                node[PARENT] = parent
+                parent_id = len(parents)
+                node[PARENT] = parent_id
+                parents[parent_id] = parent
                 result.append(node)
             else:
                 # Create the node if it doesn't exist
@@ -271,7 +273,7 @@ class TreeBuilder:
                 for child in items:
                     queue.appendleft((index + 1, child, node[tag]))
         
-        return split[max_depth], result
+        return split[max_depth], result, parents
 
     def __generate_ancestor_nodes_as_values(self, items, entry, target_length):
         i, values = 0, []
@@ -287,7 +289,7 @@ class TreeBuilder:
         return values
         
         
-    def __attach_items_to_tree(self, items: List[Dict[str, Any]], entry: str):
+    def __attach_items_to_tree(self, items: List[Dict[str, Any]], entry: str, parents: Dict[str, List]):
         is_attribute = entry.startswith('@')
         att_entry = entry[1:len(entry)] if is_attribute else None
         
@@ -299,8 +301,9 @@ class TreeBuilder:
         # created/updated items and M the number for items in the parent list which grows
         # in this loop
         for item in items:
-            if item not in item[PARENT]:
-                item[PARENT].append(item)
+            parent = parents[item[PARENT]]
+            if item not in parent:
+                parent.append(item)
             item.pop(PARENT)
 
             if is_attribute:

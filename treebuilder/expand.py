@@ -64,7 +64,8 @@ def expand(source: List[Dict[str, Any]], entry: str, values: List[Any], deep_cop
                 for item in source:
                     if index == len(values):
                         break
-                    clone = item.copy() 
+                    
+                    clone = copy.deepcopy(item) if deep_copy else item.copy()
                     clone[entry] = copy.deepcopy(values[index]) if deep_copy else values[index]
                     index += 1
                     result.append(clone)

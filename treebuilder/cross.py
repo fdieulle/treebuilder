@@ -43,7 +43,7 @@ def cross(source: List[Dict[str, Any]], entry: str, values: List[Any], deep_copy
 
     for value in values[1:len(values)]:
         for item in source:
-            clone = item.copy()
+            clone = copy.deepcopy(item) if deep_copy else item.copy()
             clone[entry] = copy.deepcopy(value) if deep_copy else value
             result.append(clone)
 
