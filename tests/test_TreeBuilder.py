@@ -466,3 +466,42 @@ def test_cross_from_ancestor_with_an_existing_sub_tree():
     assert root['bookstore'][0]['book'][3]['details'][0]['copy_number'] == 2
     assert len(root['bookstore'][0]['book']) == 4
 
+
+def test_node_deep_copy_with_expand():
+    builder = TreeBuilder()
+
+    builder.expand('bookstore/book/details/@lang', ['en'])
+    builder.expand('bookstore/book/title', ['Sapiens', 'Harry Potter'])
+    builder.expand('bookstore/book/details/published_year', [2014, 2005])
+    builder.expand('bookstore/book/details/copy_number', [1, 2])
+
+    root = builder.root
+    assert root['bookstore'][0]['book'][0]['title'] == 'Sapiens'
+    assert root['bookstore'][0]['book'][0]['details'][0][ATTRIBUTES]['lang'] == 'en'
+    assert root['bookstore'][0]['book'][0]['details'][0]['published_year'] == 2014
+    assert root['bookstore'][0]['book'][0]['details'][0]['copy_number'] == 1
+    assert root['bookstore'][0]['book'][1]['title'] == 'Harry Potter'
+    assert root['bookstore'][0]['book'][1]['details'][0][ATTRIBUTES]['lang'] == 'en'
+    assert root['bookstore'][0]['book'][1]['details'][0]['published_year'] == 2005
+    assert root['bookstore'][0]['book'][1]['details'][0]['copy_number'] == 2
+    assert len(root['bookstore'][0]['book']) == 2
+
+
+def test_node_deep_copy_with_cross():
+    builder = TreeBuilder()
+
+    builder.expand('bookstore/book/details/@lang', ['en'])
+    builder.cross('bookstore/book/title', ['Sapiens', 'Harry Potter'])
+    builder.expand('bookstore/book/details/published_year', [2014, 2005])
+    builder.expand('bookstore/book/details/copy_number', [1, 2])
+
+    root = builder.root
+    assert root['bookstore'][0]['book'][0]['title'] == 'Sapiens'
+    assert root['bookstore'][0]['book'][0]['details'][0][ATTRIBUTES]['lang'] == 'en'
+    assert root['bookstore'][0]['book'][0]['details'][0]['published_year'] == 2014
+    assert root['bookstore'][0]['book'][0]['details'][0]['copy_number'] == 1
+    assert root['bookstore'][0]['book'][1]['title'] == 'Harry Potter'
+    assert root['bookstore'][0]['book'][1]['details'][0][ATTRIBUTES]['lang'] == 'en'
+    assert root['bookstore'][0]['book'][1]['details'][0]['published_year'] == 2005
+    assert root['bookstore'][0]['book'][1]['details'][0]['copy_number'] == 2
+    assert len(root['bookstore'][0]['book']) == 2

@@ -1,5 +1,6 @@
 from typing import Any, Dict, List
 import copy
+from treebuilder.constants import PARENT
 
 
 # Todo: maybe it should be better to returns an iterable instead of a list
@@ -64,7 +65,20 @@ def expand(source: List[Dict[str, Any]], entry: str, values: List[Any], deep_cop
                 for item in source:
                     if index == len(values):
                         break
-                    clone = item.copy() 
+                    
+                    has_parent = PARENT in item
+                    if has_parent:
+                        parent = item[PARENT]
+                        item.pop(PARENT)
+                    else:
+                        parent = None
+
+                    clone = copy.deepcopy(item) if deep_copy else item.copy()
+
+                    if has_parent:
+                        item[PARENT] = parent
+                        clone[PARENT] = parent
+
                     clone[entry] = copy.deepcopy(values[index]) if deep_copy else values[index]
                     index += 1
                     result.append(clone)
