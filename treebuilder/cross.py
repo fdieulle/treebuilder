@@ -1,6 +1,5 @@
 from typing import Any, Dict, List
 import copy
-from treebuilder.constants import PARENT
 
 
 # Todo: maybe it should be better to returns an iterable instead of a list
@@ -44,20 +43,7 @@ def cross(source: List[Dict[str, Any]], entry: str, values: List[Any], deep_copy
 
     for value in values[1:len(values)]:
         for item in source:
-
-            has_parent = PARENT in item
-            if has_parent:
-                parent = item[PARENT]
-                item.pop(PARENT)
-            else:
-                parent = None
-
             clone = copy.deepcopy(item) if deep_copy else item.copy()
-
-            if has_parent:
-                item[PARENT] = parent
-                clone[PARENT] = parent
-
             clone[entry] = copy.deepcopy(value) if deep_copy else value
             result.append(clone)
 
