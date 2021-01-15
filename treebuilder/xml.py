@@ -5,6 +5,11 @@ from xml.dom import minidom
 
 from treebuilder.constants import ATTRIBUTES
 
+def __to_xml_text(x):
+    if type(x) is bool:
+        return 'true' if x else 'false'
+    return str(x)
+
 
 def to_xml_tree(tree: Dict[str, Any], root: str = None) -> ElementTree:
 
@@ -38,7 +43,7 @@ def to_xml_tree(tree: Dict[str, Any], root: str = None) -> ElementTree:
                     stack.append((x, xml_child))                    
             else: # It's a leaf
                 xml_child = SubElement(xml, entry)
-                xml_child.text = str(item)
+                xml_child.text = __to_xml_text(item)
     
     return xml_root
 
