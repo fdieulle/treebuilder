@@ -16,10 +16,16 @@ after_success:
  - codecov -t $CODECOV_TOKEN
 
 deploy:
- provider: pypi
- user: __token__
- password: $FDIEULLE_PYPI_TOKEN
- distributions: "sdist bdist_wheel"
- skip_existing: true
- on:
-  branch: staging
+  - provider: pypi
+    user: __token__
+    password: $FDIEULLE_PYPI_TOKEN
+    distributions: "sdist bdist_wheel"
+    skip_existing: true
+    on:
+      tags: true
+  - provider: release
+    api_key: $GITHUB_TOKEN
+    file: "dist/*"
+    skip_cleanup: true
+    on:
+      tags: true
