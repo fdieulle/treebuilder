@@ -29,7 +29,7 @@ In this example we want to build a simple tree which represents a breakfast menu
 The following code shows you the long way to proceed (non vectorized). 
 In the next section we will see how to vectorize it.
 
-```{python}
+```python
 import treebuilder as tb
 
 builder = tb.TreeBuilder()
@@ -50,7 +50,7 @@ builder.to_xml('output.xml')
 
 The output is stored here into a xml file named `output.xml`. And looks like:
 
-```{xml}
+```xml
 <breakfast_menu>
   <food>
     <name>Belgian Wafles</name>
@@ -75,7 +75,7 @@ All the following examples assume that your output is an xml.
 
 We can produce the same result with the less code by using vectorization:
 
-```{python}
+```python
 builder = tb.TreeBuilder()
 
 names = ['Belgian Wafles', 'French Toast', 'Homestyle Breakfast']
@@ -88,11 +88,11 @@ builder.nest('/breakfast_menu/food/calories', ['650', '650', '950'])
 
 Imagine that we want to add a discount on our food about `5%` by default.
 
-```{python}
+```python
 builder.set('/breakfast_menu/food/discount', '5%')
 ```
 Output:
-```{xml}
+```xml
 <breakfast_menu>
   <food>
     <name>Belgian Wafles</name>
@@ -120,11 +120,11 @@ Output:
 To keep our clients healthy, we prefer providing a better discount for the food with less calories.
 For example we want to apply a `7%` discount for all foods with 650 calories.
 
-```{python}
+```python
 builder.set('/breakfast_menu/food[calories=650]/discount', '7%')
 ```
 Output:
-```{xml}
+```xml
 <breakfast_menu>
   <food>
     <name>Belgian Wafles</name>
@@ -177,12 +177,12 @@ A ring logic means that when the end of the list is reached the iterator goes ba
 The easiest example is at the begining when the tree is empty. So we create 1 leaf by value.
 Here `len(values) > len(source)`
 
-```{python}
+```python
 builder = tb.TreeBuilder()
 builder.expand('bookstore/book/title', ['Sapiens', 'Harry Potter'])
 ```
 Output:
-```{xml}
+```xml
 <bookstore>
   <book>
     <title>Sapiens</title>
@@ -196,11 +196,11 @@ Output:
 Now we can give a price to each book:
 Here `len(values) == len(source)`
 
-```{python}
+```python
 builder.expand('bookstore/book/price', ['$39.95', '$29.99'])
 ```
 Output:
-```{xml}
+```xml
 <bookstore>
   <book>
     <title>Sapiens</title>
@@ -215,11 +215,11 @@ Output:
 
 We test the last case by setting a discount on all books.
 Here `len(values) < len(source)`
-```{python}
+```python
 builder.expand('bookstore/book/discount', ['5%'])
 ```
 Output:
-```{xml}
+```xml
 <bookstore>
   <book>
     <title>Sapiens</title>
@@ -253,11 +253,11 @@ In the `TreeBuilder` class the source list correspond to the selected leaves in 
 Imagine we have a bookstore and we want to duplicate our books with 2 different copies.
 An identifier should be provided for each copy, let's say `1` and `2`.
 
-```{python}
+```python
 builder.cross('bookstore/book/copy_id', [1, 2])
 ```
 Output:
-```{xml}
+```xml
 <bookstore>
   <book>
     <title>Sapiens</title>
@@ -300,11 +300,11 @@ This key is defined as a constant in the package if you need to use it: `from tr
 
 #### How to set an attribute
 
-```{python}
+```python
 builder.set('bookstore/book/@lang', 'en')
 ```
 Output:
-```{xml}
+```xml
 <bookstore>
   <book lang="en">
     <title>Sapiens</title>
@@ -325,7 +325,7 @@ We create a book store with 2 books and 2 copies of each.
 We also setup the lang as an attribute and a price for each of them.
 It takes only 4 lines of code to acheive as follow:
 
-```{python}
+```python
 import treebuilder as tb
 
 builder = tb.TreeBuilder()
@@ -346,7 +346,7 @@ builder.to_xml('bookstore.xml')
 ```
 Output:
 
-```{xml}
+```xml
 <bookstore>
   <book lang="en">
     <title>Sapiens</title>
@@ -375,12 +375,12 @@ Output:
 
 We want now add the author for each book. Each book has its own author so we need to select a sub tree to apply the author.
 
-```{python}
+```python
 builder.set('/bookstore/book[title=\'Harry Potter\']/author', 'J K. Rowling')
 builder.set('/bookstore/book[title=Sapiens]/author', 'Y N. Harari')
 ```
 Output
-```{xml}
+```xml
 <bookstore>
   <book lang="en">
     <title>Sapiens</title>
@@ -413,12 +413,12 @@ Output
 
 We want add a details section for a book where we will store addtional informations like the publish year.
 
-```{python}
+```python
 builder.set('/bookstore/book[title=\'Harry Potter\']/details/published_year', '2005')
 builder.set('/bookstore/book[title=Sapiens]/details/published_year', '2014')
 ```
 Output
-```{xml}
+```xml
 <bookstore>
   <book lang="en">
     <title>Sapiens</title>
@@ -464,12 +464,12 @@ Output
 Now we want to set the list of calient which has borrowed books
 Let's that there is 5 people which borrow Spaiens and 3 Harry Potter
 
-```{python}
+```python
 builder.expand('/bookstore/book[title="Harry Potter"]/borrowers/borrower/name', [f'Client_{i+1}' for i in range(3)])
 builder.expand('/bookstore/book[title=Sapiens]/borrowers/borrower/name', [f'Client_{i+1}' for i in range(5)])
 ```
 Output
-```{xml}
+```xml
 <bookstore>
   <book lang="en">
     <title>Sapiens</title>
