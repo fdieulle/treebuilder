@@ -23,9 +23,11 @@ deploy:
     skip_existing: true
     on:
       tags: true
+      python: "3.9"
   - provider: release
     api_key: $GITHUB_TOKEN
     file: "dist/*"
     skip_cleanup: true
     on:
       tags: true
+      python: "3.9"
