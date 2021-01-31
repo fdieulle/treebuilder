@@ -21,14 +21,11 @@ deploy:
     password: $FDIEULLE_PYPI_TOKEN
     distributions: "sdist bdist_wheel"
     skip_existing: true
-    skip_cleanup: true
     on:
       tags: true
       python: "3.9"
   - provider: release
     api_key: $GITHUB_TOKEN
-    file: "dist/*"
-    skip_cleanup: true
     on:
       tags: true
       python: "3.9"
