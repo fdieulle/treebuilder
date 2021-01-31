@@ -1,6 +1,11 @@
 # Tree builder
 
-[![Build Status](https://travis-ci.com/fdieulle/treebuilder.svg?branch=main)](https://travis-ci.com/github/fdieulle/treebuilder) [![codecov](https://codecov.io/gh/fdieulle/treebuilder/branch/main/graph/badge.svg?token=A2N3JMEPN6)](https://codecov.io/gh/fdieulle/treebuilder)
+[![Build Status](https://travis-ci.com/fdieulle/treebuilder.svg?branch=main)](https://travis-ci.com/github/fdieulle/treebuilder)
+[![codecov](https://codecov.io/gh/fdieulle/treebuilder/branch/main/graph/badge.svg?token=A2N3JMEPN6)](https://codecov.io/gh/fdieulle/treebuilder)
+
+[![license](https://img.shields.io/badge/license-MIT-blue.svg?maxAge=3600)](./LICENSE) 
+[![pypi](https://img.shields.io/pypi/v/treebuilder.svg)](https://pypi.org/project/treebuilder/)
+[![python supported](https://img.shields.io/pypi/pyversions/treebuilder.svg)](https://pypi.org/project/treebuilder/)
 
 `treebuilder` is a python package which helps you to **build a tree data model** like XML or JSON configuration files.<br />
 All **operations** of insert/update are **vectorized**.<br />
